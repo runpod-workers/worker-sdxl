@@ -1,10 +1,10 @@
 <div align="center">
 
-<h1>Template | Worker</h1>
+<h1>Stable Diffusion XL | Worker</h1>
 
 [![CI | Test Worker](https://github.com/runpod-workers/worker-template/actions/workflows/CI-test_worker.yml/badge.svg)](https://github.com/runpod-workers/worker-template/actions/workflows/CI-test_worker.yml)
 &nbsp;
-[![Docker Image](https://github.com/runpod-workers/worker-template/actions/workflows/CD-docker_dev.yml/badge.svg)](https://github.com/runpod-workers/worker-template/actions/workflows/CD-docker_dev.yml)
+[![CD | Dev Docker Image](https://github.com/runpod-workers/worker-sdxl/actions/workflows/CD-docker_dev.yml/badge.svg)](https://github.com/runpod-workers/worker-sdxl/actions/workflows/CD-docker_dev.yml)
 
 🚀 | A simple worker that can be used as a starting point to build your own custom RunPod Endpoint API worker.
 </div>

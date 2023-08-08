@@ -6,14 +6,17 @@ INPUT_SCHEMA = {
     'negative_prompt': {
         'type': str,
         'required': False,
+        'default': None
     },
     'height': {
         'type': int,
         'required': False,
+        'default': 512
     },
     'width': {
         'type': int,
         'required': False,
+        'default': 512
     },
     'num_inference_steps': {
         'type': int,
