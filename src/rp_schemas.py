@@ -11,12 +11,12 @@ INPUT_SCHEMA = {
     'height': {
         'type': int,
         'required': False,
-        'default': 512
+        'default': 1024
     },
     'width': {
         'type': int,
         'required': False,
-        'default': 512
+        'default': 1024
     },
     'num_inference_steps': {
         'type': int,
