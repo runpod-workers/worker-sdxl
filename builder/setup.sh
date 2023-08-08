@@ -8,7 +8,14 @@ apt-get update && apt-get upgrade -y
 
 # Install System Dependencies
 # - openssh-server: for ssh access and web terminal
-apt-get install -y --no-install-recommends software-properties-common curl git openssh-server
+apt-get install -y --no-install-recommends \
+    software-properties-common \
+    curl \
+    git \
+    wget \
+    openssh-server \
+    libgl1-mesa-glx \
+    libglib2.0-0
 
 # Install Python 3.10
 add-apt-repository ppa:deadsnakes/ppa -y
