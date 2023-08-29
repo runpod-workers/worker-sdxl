@@ -4,6 +4,7 @@ Contains the handler function that will be called by the serverless.
 
 import os
 import torch
+import concurrent.futures
 from diffusers import StableDiffusionXLPipeline, StableDiffusionXLImg2ImgPipeline
 from diffusers.utils import load_image
 
@@ -13,20 +14,33 @@ from runpod.serverless.utils.rp_validator import validate
 
 from rp_schemas import INPUT_SCHEMA
 
-# Setup the models
-pipe = StableDiffusionXLPipeline.from_pretrained(
-    "stabilityai/stable-diffusion-xl-base-1.0", torch_dtype=torch.float16, variant="fp16", use_safetensors=True, add_watermarker=False
-)
-pipe.to("cuda")
-pipe.enable_xformers_memory_efficient_attention()
 
-refiner = StableDiffusionXLImg2ImgPipeline.from_pretrained(
-    "stabilityai/stable-diffusion-xl-refiner-1.0", torch_dtype=torch.float16, variant="fp16", use_safetensors=True, add_watermarker=False
-)
-refiner.to("cuda")
-refiner.enable_xformers_memory_efficient_attention()
+# -------------------------------- Load Models ------------------------------- #
+def load_base():
+    base_pipe = StableDiffusionXLPipeline.from_pretrained(
+        "stabilityai/stable-diffusion-xl-base-1.0",
+        torch_dtype=torch.float16, variant="fp16", use_safetensors=True, add_watermarker=False
+    ).to("cuda")
+    base_pipe.enable_xformers_memory_efficient_attention()
 
 
+def load_refiner():
+    refiner_pipe = StableDiffusionXLImg2ImgPipeline.from_pretrained(
+        "stabilityai/stable-diffusion-xl-refiner-1.0",
+        torch_dtype=torch.float16, variant="fp16", use_safetensors=True, add_watermarker=False
+    ).to("cuda")
+    refiner_pipe.enable_xformers_memory_efficient_attention()
+
+
+with concurrent.futures.ThreadPoolExecutor() as executor:
+    future_base = executor.submit(load_base)
+    future_refiner = executor.submit(load_refiner)
+
+    base = future_base.result()
+    refiner = future_refiner.result()
+
+
+# ---------------------------------- Helper ---------------------------------- #
 def _save_and_upload_images(images, job_id):
     os.makedirs(f"/{job_id}", exist_ok=True)
     image_urls = []
@@ -51,46 +65,37 @@ def generate_image(job):
 
     if 'errors' in validated_input:
         return {"error": validated_input['errors']}
+    job_input = validated_input['validated_input']
 
-    # Extracting the new parameters
-    prompt = validated_input['validated_input'].get('prompt')
-    negative_prompt = validated_input['validated_input'].get('negative_prompt')
-    height = validated_input['validated_input'].get('height')
-    width = validated_input['validated_input'].get('width')
-    num_inference_steps = validated_input['validated_input'].get(
-        'num_inference_steps', 25)  # Default value if not provided
-    refiner_inference_steps = validated_input['validated_input'].get(
-        'refiner_inference_steps', 50)  # Default value
-    guidance_scale = validated_input['validated_input'].get('guidance_scale', 7.5)  # Default value
-    image_url = validated_input['validated_input'].get('image_url')
-    strength = validated_input['validated_input'].get('strength', 0.3)
+    image_url = job_input['image_url']
 
     if image_url:  # If image_url is provided, run only the refiner pipeline
         init_image = load_image(image_url).convert("RGB")
         output = refiner(
-            prompt=prompt,
-            num_inference_steps=refiner_inference_steps,  # Using refiner_inference_steps for refiner
-            strength=strength,
+            prompt=job_input['prompt'],
+            num_inference_steps=job_input['refiner_inference_steps'],
+            strength=job_input['strength'],
             image=init_image
         ).images[0]
     else:
         # Generate latent image using pipe
-        image = pipe(
-            prompt=prompt,
-            negative_prompt=negative_prompt,
-            height=height,
-            width=width,
-            num_inference_steps=num_inference_steps,  # Using num_inference_steps for pipe
-            guidance_scale=guidance_scale,
-            output_type="latent"
-        ).images[0]
+        image = base(
+            prompt=job_input['prompt'],
+            negative_prompt=job_input['negative_prompt'],
+            height=job_input['height'],
+            width=job_input['width'],
+            num_inference_steps=job_input['num_inference_steps'],
+            guidance_scale=job_input['guidance_scale'],
+            output_type="latent",
+            num_images_per_prompt=job_input['num_images']
+        ).images
 
         # Refine the image using refiner with refiner_inference_steps
         output = refiner(
-            prompt=prompt,
-            num_inference_steps=refiner_inference_steps,  # Using refiner_inference_steps for refiner
-            strength=strength,
-            image=image[None, :]
+            prompt=job_input['prompt'],
+            num_inference_steps=job_input['refiner_inference_steps'],
+            strength=job_input['strength'],
+            image=image
         ).images[0]
 
     image_urls = _save_and_upload_images([output], job['id'])

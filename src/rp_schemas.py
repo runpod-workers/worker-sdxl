@@ -42,5 +42,10 @@ INPUT_SCHEMA = {
         'type': str,
         'required': False,
         'default': None
+    },
+    'num_images': {
+        'type': int,
+        'required': False,
+        'default': 1
     }
 }
