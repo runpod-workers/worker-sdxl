@@ -22,6 +22,7 @@ def load_base():
         torch_dtype=torch.float16, variant="fp16", use_safetensors=True, add_watermarker=False
     ).to("cuda")
     base_pipe.enable_xformers_memory_efficient_attention()
+    return base_pipe
 
 
 def load_refiner():
@@ -30,6 +31,7 @@ def load_refiner():
         torch_dtype=torch.float16, variant="fp16", use_safetensors=True, add_watermarker=False
     ).to("cuda")
     refiner_pipe.enable_xformers_memory_efficient_attention()
+    return refiner_pipe
 
 
 with concurrent.futures.ThreadPoolExecutor() as executor:
