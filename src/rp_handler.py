@@ -129,7 +129,7 @@ def generate_image(job):
             strength=job_input['strength'],
             image=image,
             generator=generator
-        ).images
+        ).images[0]
 
     image_urls = _save_and_upload_images([output], job['id'])
 
