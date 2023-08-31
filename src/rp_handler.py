@@ -128,6 +128,7 @@ def generate_image(job):
             num_inference_steps=job_input['refiner_inference_steps'],
             strength=job_input['strength'],
             image=image,
+            num_images_per_prompt=job_input['num_images'],
             generator=generator
         ).images[0]
 
