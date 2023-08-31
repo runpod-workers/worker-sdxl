@@ -76,6 +76,7 @@ def make_scheduler(name, config):
     }[name]
 
 
+@torch.inference_mode()
 def generate_image(job):
     '''
     Generate an image from text using your Model
