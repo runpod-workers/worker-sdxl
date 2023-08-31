@@ -2,11 +2,11 @@
 
 <h1>Stable Diffusion XL | Worker</h1>
 
-[![CI | Test Worker](https://github.com/runpod-workers/worker-template/actions/workflows/CI-test_worker.yml/badge.svg)](https://github.com/runpod-workers/worker-template/actions/workflows/CI-test_worker.yml)
+[![CI | Test Worker](https://github.com/runpod-workers/worker-sdxl/actions/workflows/CI-test_worker.yml/badge.svg)](https://github.com/runpod-workers/worker-sdxl/actions/workflows/CI-test_worker.yml)
 &nbsp;
 [![CD | Dev Docker Image](https://github.com/runpod-workers/worker-sdxl/actions/workflows/CD-docker_dev.yml/badge.svg)](https://github.com/runpod-workers/worker-sdxl/actions/workflows/CD-docker_dev.yml)
 
-🚀 | A simple worker that can be used as a starting point to build your own custom RunPod Endpoint API worker.
+🚀 | RunPod implementation of SDXL for serverless deployment.
 </div>
 
 ## 📖 | Getting Started
@@ -32,14 +32,6 @@ The `CD-docker_dev.yml` file will build the image and push it to the `dev` tag, 
 
 The `CI-test_worker.yml` file will test the worker using the input provided by the `--test_input` argument when calling the file containing your handler. Be sure to update this workflow to install any dependencies you need to run your tests.
 
-## 💡 | Best Practices
-
-System dempendency installation, model caching, and other shell tasks should be added to the `builder/setup.sh` this will allow you to easily setup your Dockerfile as well as run CI/CD tasks.
-
-Models should be part of your docker image, this can be accomplished by either copying them into the image or downloading them during the build process.
-
-If using the input validation utility from the runpod python package, create a `schemas` python file where you can define the schemas, then import that file into your `handler.py` file.
-
 ## 🔗 | Links
 
-🐳 [Docker Container](https://hub.docker.com/r/runpod/serverless-hello-world)
+🐳 [Docker Container](https://hub.docker.com/r/runpod/ai-api-sdxl)
