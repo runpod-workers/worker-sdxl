@@ -18,6 +18,16 @@ INPUT_SCHEMA = {
         'required': False,
         'default': 1024
     },
+    'seed': {
+        'type': int,
+        'required': False,
+        'default': None
+    },
+    'scheduler': {
+        'type': str,
+        'required': False,
+        'default': 'DDIM'
+    },
     'num_inference_steps': {
         'type': int,
         'required': False,
