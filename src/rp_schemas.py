@@ -56,6 +56,7 @@ INPUT_SCHEMA = {
     'num_images': {
         'type': int,
         'required': False,
-        'default': 1
+        'default': 1,
+        'constraints': lambda img_count: 3 > img_count > 0
     }
 }
