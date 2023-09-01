@@ -130,9 +130,9 @@ def generate_image(job):
             image=image,
             num_images_per_prompt=job_input['num_images'],
             generator=generator
-        ).images[0]
+        ).images
 
-    image_urls = _save_and_upload_images([output], job['id'])
+    image_urls = _save_and_upload_images(output, job['id'])
 
     return {"image_url": image_urls[0]} if len(image_urls) == 1 else {"images": image_urls}
 
