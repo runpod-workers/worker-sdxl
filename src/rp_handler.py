@@ -134,7 +134,13 @@ def generate_image(job):
 
     image_urls = _save_and_upload_images(output, job['id'])
 
-    return {"image_url": image_urls[0]} if len(image_urls) == 1 else {"images": image_urls}
+    results = {
+        "images": image_urls,
+        "image_url": image_urls[0],
+        "seed": job_input['seed']
+    }
+
+    return results
 
 
 runpod.serverless.start({"handler": generate_image})
