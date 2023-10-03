@@ -107,7 +107,7 @@ def generate_image(job):
             strength=job_input['strength'],
             image=init_image,
             generator=generator
-        ).images[0]
+        ).images
     else:
         # Generate latent image using pipe
         image = base(
