@@ -89,7 +89,7 @@ def generate_image(job):
         return {"error": validated_input['errors']}
     job_input = validated_input['validated_input']
 
-    image_url = job_input['image_url']
+    starting_image = job_input['image_url']
 
     if job_input['seed'] is None:
         job_input['seed'] = int.from_bytes(os.urandom(2), "big")
@@ -98,8 +98,8 @@ def generate_image(job):
 
     base.scheduler = make_scheduler(job_input['scheduler'], base.scheduler.config)
 
-    if image_url:  # If image_url is provided, run only the refiner pipeline
-        init_image = load_image(image_url).convert("RGB")
+    if starting_image:  # If image_url is provided, run only the refiner pipeline
+        init_image = load_image(starting_image).convert("RGB")
         output = refiner(
             prompt=job_input['prompt'],
             num_inference_steps=job_input['refiner_inference_steps'],
@@ -138,6 +138,9 @@ def generate_image(job):
         "image_url": image_urls[0],
         "seed": job_input['seed']
     }
+
+    if starting_image:
+        results['refresh_worker'] = True
 
     return results
 
