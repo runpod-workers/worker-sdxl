@@ -29,7 +29,7 @@ def load_base():
     base_pipe = StableDiffusionXLPipeline.from_pretrained(
         "stabilityai/stable-diffusion-xl-base-1.0",
         torch_dtype=torch.float16, variant="fp16", use_safetensors=True, add_watermarker=False
-    ).to("cuda")
+    ).to("cuda", dtype=torch.float16)
     base_pipe.enable_xformers_memory_efficient_attention()
     return base_pipe
 
@@ -38,7 +38,7 @@ def load_refiner():
     refiner_pipe = StableDiffusionXLImg2ImgPipeline.from_pretrained(
         "stabilityai/stable-diffusion-xl-refiner-1.0",
         torch_dtype=torch.float16, variant="fp16", use_safetensors=True, add_watermarker=False
-    ).to("cuda")
+    ).to("cuda", dtype=torch.float16)
     refiner_pipe.enable_xformers_memory_efficient_attention()
     return refiner_pipe
 
