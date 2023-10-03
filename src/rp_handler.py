@@ -3,6 +3,7 @@ Contains the handler function that will be called by the serverless.
 '''
 
 import os
+import base64
 import concurrent.futures
 
 import torch
@@ -59,8 +60,14 @@ def _save_and_upload_images(images, job_id):
         image_path = os.path.join(f"/{job_id}", f"{index}.png")
         image.save(image_path)
 
-        image_url = rp_upload.upload_image(job_id, image_path)
-        image_urls.append(image_url)
+        if os.environ.get('BUCKET_ENDPOINT_URL', False):
+            image_url = rp_upload.upload_image(job_id, image_path)
+            image_urls.append(image_url)
+        else:
+            with open(image_path, "rb") as image_file:
+                image_data = base64.b64encode(image_file.read()).decode("utf-8")
+                image_urls.append(f"data:image/png;base64,{image_data}")
+
     rp_cleanup.clean([f"/{job_id}"])
     return image_urls
 
