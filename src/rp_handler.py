@@ -3,8 +3,9 @@ Contains the handler function that will be called by the serverless.
 '''
 
 import os
-import torch
 import concurrent.futures
+
+import torch
 from diffusers import StableDiffusionXLPipeline, StableDiffusionXLImg2ImgPipeline
 from diffusers.utils import load_image
 
@@ -13,7 +14,6 @@ from diffusers import (
     LMSDiscreteScheduler,
     DDIMScheduler,
     EulerDiscreteScheduler,
-    EulerAncestralDiscreteScheduler,
     DPMSolverMultistepScheduler,
 )
 
@@ -71,7 +71,6 @@ def make_scheduler(name, config):
         "KLMS": LMSDiscreteScheduler.from_config(config),
         "DDIM": DDIMScheduler.from_config(config),
         "K_EULER": EulerDiscreteScheduler.from_config(config),
-        # "K_EULER_ANCESTRAL": EulerAncestralDiscreteScheduler.from_config(config),
         "DPMSolverMultistep": DPMSolverMultistepScheduler.from_config(config),
     }[name]
 
