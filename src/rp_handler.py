@@ -24,6 +24,7 @@ from runpod.serverless.utils.rp_validator import validate
 
 from rp_schemas import INPUT_SCHEMA
 
+torch.cuda.empty_cache()
 
 # ------------------------------- Model Handler ------------------------------ #
 class ModelHandler:
