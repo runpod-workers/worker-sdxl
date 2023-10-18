@@ -25,32 +25,39 @@ from runpod.serverless.utils.rp_validator import validate
 from rp_schemas import INPUT_SCHEMA
 
 
-# -------------------------------- Load Models ------------------------------- #
-def load_base():
-    base_pipe = StableDiffusionXLPipeline.from_pretrained(
-        "stabilityai/stable-diffusion-xl-base-1.0",
-        torch_dtype=torch.float16, variant="fp16", use_safetensors=True, add_watermarker=False
-    ).to("cuda", silence_dtype_warnings=True)
-    base_pipe.enable_xformers_memory_efficient_attention()
-    return base_pipe
+# ------------------------------- Model Handler ------------------------------ #
+class ModelHandler:
+    def __init__(self):
+        self.base = None
+        self.refiner = None
+        self.load_models()
+
+    def load_base(self):
+        base_pipe = StableDiffusionXLPipeline.from_pretrained(
+            "stabilityai/stable-diffusion-xl-base-1.0",
+            torch_dtype=torch.float16, variant="fp16", use_safetensors=True, add_watermarker=False
+        ).to("cuda", silence_dtype_warnings=True)
+        base_pipe.enable_xformers_memory_efficient_attention()
+        return base_pipe
 
 
-def load_refiner():
-    refiner_pipe = StableDiffusionXLImg2ImgPipeline.from_pretrained(
-        "stabilityai/stable-diffusion-xl-refiner-1.0",
-        torch_dtype=torch.float16, variant="fp16", use_safetensors=True, add_watermarker=False
-    ).to("cuda", silence_dtype_warnings=True)
-    refiner_pipe.enable_xformers_memory_efficient_attention()
-    return refiner_pipe
+    def load_refiner(self):
+        refiner_pipe = StableDiffusionXLImg2ImgPipeline.from_pretrained(
+            "stabilityai/stable-diffusion-xl-refiner-1.0",
+            torch_dtype=torch.float16, variant="fp16", use_safetensors=True, add_watermarker=False
+        ).to("cuda", silence_dtype_warnings=True)
+        refiner_pipe.enable_xformers_memory_efficient_attention()
+        return refiner_pipe
 
+    def load_models(self):
+        with concurrent.futures.ThreadPoolExecutor() as executor:
+            future_base = executor.submit(self.load_base)
+            future_refiner = executor.submit(self.load_refiner)
 
-with concurrent.futures.ThreadPoolExecutor() as executor:
-    future_base = executor.submit(load_base)
-    future_refiner = executor.submit(load_refiner)
+            self.base = future_base.result()
+            self.refiner = future_refiner.result()
 
-    base = future_base.result()
-    refiner = future_refiner.result()
-
+MODELS = ModelHandler()
 
 # ---------------------------------- Helper ---------------------------------- #
 def _save_and_upload_images(images, job_id):
@@ -103,11 +110,11 @@ def generate_image(job):
 
     generator = torch.Generator("cuda").manual_seed(job_input['seed'])
 
-    base.scheduler = make_scheduler(job_input['scheduler'], base.scheduler.config)
+    MODELS.base.scheduler = make_scheduler(job_input['scheduler'], MODELS.base.scheduler.config)
 
     if starting_image:  # If image_url is provided, run only the refiner pipeline
         init_image = load_image(starting_image).convert("RGB")
-        output = refiner(
+        output = MODELS.refiner(
             prompt=job_input['prompt'],
             num_inference_steps=job_input['refiner_inference_steps'],
             strength=job_input['strength'],
@@ -116,7 +123,7 @@ def generate_image(job):
         ).images
     else:
         # Generate latent image using pipe
-        image = base(
+        image = MODELS.base(
             prompt=job_input['prompt'],
             negative_prompt=job_input['negative_prompt'],
             height=job_input['height'],
@@ -129,7 +136,7 @@ def generate_image(job):
         ).images
 
         # Refine the image using refiner with refiner_inference_steps
-        output = refiner(
+        output = MODELS.refiner(
             prompt=job_input['prompt'],
             num_inference_steps=job_input['refiner_inference_steps'],
             strength=job_input['strength'],
