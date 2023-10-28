@@ -13,3 +13,4 @@ PyWavelets>=1.1.1
 opencv-python>=4.8.1.78
 invisible-watermark==0.2.0
 xformers==0.0.22
+torch==2.0.1+cu118
