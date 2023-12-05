@@ -1,5 +1,3 @@
-# builder/model_fetcher.py
-
 import torch
 from diffusers import StableDiffusionXLPipeline, StableDiffusionXLImg2ImgPipeline
 
