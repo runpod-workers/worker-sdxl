@@ -2,6 +2,7 @@
 # Reccomended to lock the version number to avoid unexpected changes.
 
 runpod==1.4.0
+hf_transfer
 
 diffusers==0.21.4
 transformers==4.34.0
