@@ -27,6 +27,8 @@ from rp_schemas import INPUT_SCHEMA
 torch.cuda.empty_cache()
 
 # ------------------------------- Model Handler ------------------------------ #
+
+
 class ModelHandler:
     def __init__(self):
         self.base = None
@@ -40,7 +42,6 @@ class ModelHandler:
         ).to("cuda", silence_dtype_warnings=True)
         base_pipe.enable_xformers_memory_efficient_attention()
         return base_pipe
-
 
     def load_refiner(self):
         refiner_pipe = StableDiffusionXLImg2ImgPipeline.from_pretrained(
@@ -58,9 +59,12 @@ class ModelHandler:
             self.base = future_base.result()
             self.refiner = future_refiner.result()
 
+
 MODELS = ModelHandler()
 
 # ---------------------------------- Helper ---------------------------------- #
+
+
 def _save_and_upload_images(images, job_id):
     os.makedirs(f"/{job_id}", exist_ok=True)
     image_urls = []
@@ -137,14 +141,20 @@ def generate_image(job):
         ).images
 
         # Refine the image using refiner with refiner_inference_steps
-        output = MODELS.refiner(
-            prompt=job_input['prompt'],
-            num_inference_steps=job_input['refiner_inference_steps'],
-            strength=job_input['strength'],
-            image=image,
-            num_images_per_prompt=job_input['num_images'],
-            generator=generator
-        ).images
+        try:
+            output = MODELS.refiner(
+                prompt=job_input['prompt'],
+                num_inference_steps=job_input['refiner_inference_steps'],
+                strength=job_input['strength'],
+                image=image,
+                num_images_per_prompt=job_input['num_images'],
+                generator=generator
+            ).images
+        except RuntimeError as err:
+            return {
+                "error": f"RuntimeError: {err}, Stack Trace: {err.__traceback__}",
+                "refresh_worker": True
+            }
 
     image_urls = _save_and_upload_images(output, job['id'])
 
