@@ -4,7 +4,7 @@
 runpod==1.4.0
 hf_transfer
 
-diffusers==0.21.4
+diffusers
 transformers==4.34.0
 accelerate==0.23.0
 safetensors==0.3.2
