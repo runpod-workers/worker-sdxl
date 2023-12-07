@@ -4,7 +4,7 @@
 runpod==1.4.0
 hf_transfer
 
-diffusers
+diffusers==0.24.0
 transformers==4.34.0
 accelerate==0.23.0
 safetensors==0.3.2
@@ -13,5 +13,5 @@ numpy>=1.26.1
 PyWavelets>=1.1.1
 opencv-python>=4.8.1.78
 invisible-watermark==0.2.0
-xformers==0.0.22
+xformers==0.0.23
 torch --index-url https://download.pytorch.org/whl/cu118

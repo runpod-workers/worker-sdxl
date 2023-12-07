@@ -41,7 +41,8 @@ class ModelHandler:
         base_pipe = StableDiffusionXLPipeline.from_pretrained(
             "stabilityai/stable-diffusion-xl-base-1.0", vae=vae,
             torch_dtype=torch.float16, variant="fp16", use_safetensors=True, add_watermarker=False
-        ).to("cuda", silence_dtype_warnings=True)
+        )
+        base_pipe = base_pipe.to("cuda", silence_dtype_warnings=True)
         base_pipe.enable_xformers_memory_efficient_attention()
         return base_pipe
 
@@ -51,7 +52,8 @@ class ModelHandler:
         refiner_pipe = StableDiffusionXLImg2ImgPipeline.from_pretrained(
             "stabilityai/stable-diffusion-xl-refiner-1.0", vae=vae,
             torch_dtype=torch.float16, variant="fp16", use_safetensors=True, add_watermarker=False
-        ).to("cuda", silence_dtype_warnings=True)
+        )
+        refiner_pipe = refiner_pipe.to("cuda", silence_dtype_warnings=True)
         refiner_pipe.enable_xformers_memory_efficient_attention()
         return refiner_pipe
 

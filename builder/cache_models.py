@@ -35,6 +35,7 @@ def get_diffusion_pipelines():
     vae = fetch_pretrained_model(
         AutoencoderKL, "madebyollin/sdxl-vae-fp16-fix", **{"torch_dtype": torch.float16}
     )
+    print("Loaded VAE")
     refiner = fetch_pretrained_model(StableDiffusionXLImg2ImgPipeline,
                                      "stabilityai/stable-diffusion-xl-refiner-1.0", **common_args)
 
