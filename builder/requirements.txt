@@ -1,10 +1,7 @@
-# Required Python packages get listed here, one per line.
-# Reccomended to lock the version number to avoid unexpected changes.
-
 runpod==1.4.0
 hf_transfer
 
-diffusers==0.24.0
+diffusers
 transformers==4.34.0
 accelerate==0.23.0
 safetensors==0.3.2

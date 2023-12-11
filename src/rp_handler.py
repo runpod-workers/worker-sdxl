@@ -148,15 +148,20 @@ def generate_image(job):
             generator=generator
         ).images
 
-        # Refine the image using refiner with refiner_inference_steps
-        output = MODELS.refiner(
-            prompt=job_input['prompt'],
-            num_inference_steps=job_input['refiner_inference_steps'],
-            strength=job_input['strength'],
-            image=image,
-            num_images_per_prompt=job_input['num_images'],
-            generator=generator
-        ).images
+        try:
+            output = MODELS.refiner(
+                prompt=job_input['prompt'],
+                num_inference_steps=job_input['refiner_inference_steps'],
+                strength=job_input['strength'],
+                image=image,
+                num_images_per_prompt=job_input['num_images'],
+                generator=generator
+            ).images
+        except RuntimeError as err:
+            return {
+                "error": f"RuntimeError: {err}, Stack Trace: {err.__traceback__}",
+                "refresh_worker": True
+            }
 
     image_urls = _save_and_upload_images(output, job['id'])
 
