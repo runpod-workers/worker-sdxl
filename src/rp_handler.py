@@ -7,7 +7,7 @@ import base64
 import concurrent.futures
 
 import torch
-from diffusers import StableDiffusionXLPipeline, StableDiffusionXLImg2ImgPipeline
+from diffusers import StableDiffusionXLPipeline, StableDiffusionXLImg2ImgPipeline, AutoencoderKL
 from diffusers.utils import load_image
 
 from diffusers import (
@@ -36,18 +36,24 @@ class ModelHandler:
         self.load_models()
 
     def load_base(self):
+        vae = AutoencoderKL.from_pretrained(
+            "madebyollin/sdxl-vae-fp16-fix", torch_dtype=torch.float16)
         base_pipe = StableDiffusionXLPipeline.from_pretrained(
-            "stabilityai/stable-diffusion-xl-base-1.0",
+            "stabilityai/stable-diffusion-xl-base-1.0", vae=vae,
             torch_dtype=torch.float16, variant="fp16", use_safetensors=True, add_watermarker=False
-        ).to("cuda", silence_dtype_warnings=True)
+        )
+        base_pipe = base_pipe.to("cuda", silence_dtype_warnings=True)
         base_pipe.enable_xformers_memory_efficient_attention()
         return base_pipe
 
     def load_refiner(self):
+        vae = AutoencoderKL.from_pretrained(
+            "madebyollin/sdxl-vae-fp16-fix", torch_dtype=torch.float16)
         refiner_pipe = StableDiffusionXLImg2ImgPipeline.from_pretrained(
-            "stabilityai/stable-diffusion-xl-refiner-1.0",
+            "stabilityai/stable-diffusion-xl-refiner-1.0", vae=vae,
             torch_dtype=torch.float16, variant="fp16", use_safetensors=True, add_watermarker=False
-        ).to("cuda", silence_dtype_warnings=True)
+        )
+        refiner_pipe = refiner_pipe.to("cuda", silence_dtype_warnings=True)
         refiner_pipe.enable_xformers_memory_efficient_attention()
         return refiner_pipe
 
@@ -77,7 +83,8 @@ def _save_and_upload_images(images, job_id):
             image_urls.append(image_url)
         else:
             with open(image_path, "rb") as image_file:
-                image_data = base64.b64encode(image_file.read()).decode("utf-8")
+                image_data = base64.b64encode(
+                    image_file.read()).decode("utf-8")
                 image_urls.append(f"data:image/png;base64,{image_data}")
 
     rp_cleanup.clean([f"/{job_id}"])
@@ -115,7 +122,8 @@ def generate_image(job):
 
     generator = torch.Generator("cuda").manual_seed(job_input['seed'])
 
-    MODELS.base.scheduler = make_scheduler(job_input['scheduler'], MODELS.base.scheduler.config)
+    MODELS.base.scheduler = make_scheduler(
+        job_input['scheduler'], MODELS.base.scheduler.config)
 
     if starting_image:  # If image_url is provided, run only the refiner pipeline
         init_image = load_image(starting_image).convert("RGB")
@@ -140,7 +148,6 @@ def generate_image(job):
             generator=generator
         ).images
 
-        # Refine the image using refiner with refiner_inference_steps
         try:
             output = MODELS.refiner(
                 prompt=job_input['prompt'],
