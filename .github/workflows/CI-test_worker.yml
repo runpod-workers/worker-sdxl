@@ -53,7 +53,7 @@ jobs:
 
       - name: Execute Tests
         run: |
-          python src/handler.py --test_input='{"input": "test"}'
+          python src/rp_handler.py --test_input='{"input": "test"}'
 
   terminate_worker:
     if: ${{ always() && !success() }}
