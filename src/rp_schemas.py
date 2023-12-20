@@ -58,5 +58,10 @@ INPUT_SCHEMA = {
         'required': False,
         'default': 1,
         'constraints': lambda img_count: 3 > img_count > 0
-    }
+    },
+    'high_noise_frac': {
+        'type': float,
+        'required': False,
+        'default': None
+    },
 }
