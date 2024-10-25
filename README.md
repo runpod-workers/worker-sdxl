@@ -21,10 +21,13 @@
 
 ### CI/CD
 
-This repository is setup to automatically build and push a docker image to the GitHub Container Registry. You will need to add the following to the GitHub Secrets for this repository to enable this functionality:
+This repository is setup to automatically build and push a docker image to the GitHub Container Registry. You will need to add the following to the GitHub Secrets and Variables for this repository to enable this functionality:
 
+Github Repository Secrets:
 - `DOCKERHUB_USERNAME` | Your DockerHub username for logging in.
 - `DOCKERHUB_TOKEN` | Your DockerHub token for logging in.
+
+Github Repository Variables:
 - `DOCKERHUB_REPO` | The name of the repository you want to push to.
 - `DOCKERHUB_IMG` | The name of the image you want to push to.
 
