@@ -1,9 +1,9 @@
 {
   "title": "Stable Diffusion XL",
-  "description": "Run Stable Diffusion XL as a serverless endpoint.",
+  "description": "Generate images with Stable Diffusion XL.",
   "type": "serverless",
   "category": "image",
-  "iconUrl": "https://cdn-icons-png.flaticon.com/512/6295/6295417.png",
+  "iconUrl": "https://dummyimage.com/100x100/7b00ff/fff&text=SDXL",
   "config": {
     "runsOn": "GPU",
     "containerDiskInGb": 20,
@@ -17,7 +17,6 @@
       "12.3",
       "12.2",
       "12.1"
-    ],
-    "env": []
+    ]
   }
 }
