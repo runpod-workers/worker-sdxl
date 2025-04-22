@@ -1,0 +1,17 @@
+{
+  "input": {
+    "prompt": "A majestic steampunk dragon soaring through a cloudy sky, intricate clockwork details, golden hour lighting, highly detailed",
+    "negative_prompt": "blurry, low quality, deformed, ugly, text, watermark, signature",
+    "height": 1024,
+    "width": 1024,
+    "num_inference_steps": 25,
+    "refiner_inference_steps": 50,
+    "guidance_scale": 7.5,
+    "strength": 0.3,
+    "high_noise_frac": 0.8,
+    "seed": 42,
+    "scheduler": "K_EULER",
+    "num_images": 1,
+    "image_url": null
+  }
+}
