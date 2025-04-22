@@ -24,8 +24,11 @@ RUN pip install uv
 ENV PATH="/.venv/bin:${PATH}"
 RUN uv venv --python 3.11 /.venv
 
+# copy requirements
+COPY requirements.txt /requirements.txt
+
 # install dependencies
-RUN uv pip install torch --extra-index-url https://download.pytorch.org/whl/cu121 diffusers transformers accelerate safetensors xformers==0.0.23 runpod numpy==1.26.3 scipy triton huggingface-hub hf_transfer hf_xet setuptools
+RUN uv pip install -r /requirements.txt
 
 # copy files
 COPY download_weights.py schemas.py handler.py test_input.json /

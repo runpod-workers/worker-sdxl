@@ -1,0 +1,36 @@
+{
+  "tests": [
+    {
+      "name": "basic_test",
+      "input": {
+        "prompt": "A majestic steampunk dragon soaring through a cloudy sky, intricate clockwork details, golden hour lighting, highly detailed",
+        "negative_prompt": "blurry, low quality, deformed, ugly, text, watermark, signature",
+        "height": 1024,
+        "width": 1024,
+        "num_inference_steps": 25,
+        "refiner_inference_steps": 50,
+        "guidance_scale": 7.5,
+        "strength": 0.3,
+        "high_noise_frac": 0.8,
+        "seed": 42,
+        "scheduler": "K_EULER",
+        "num_images": 1,
+        "image_url": null
+      },
+      "timeout": 10000
+    }
+  ],
+  "config": {
+    "gpuTypeId": "NVIDIA GeForce RTX 4090",
+    "gpuCount": 1,
+    "allowedCudaVersions": [
+      "12.7",
+      "12.6",
+      "12.5",
+      "12.4",
+      "12.3",
+      "12.2",
+      "12.1"
+    ]
+  }
+}
