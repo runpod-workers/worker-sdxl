@@ -37,18 +37,42 @@ The worker accepts the following input parameters:
 
 ```json
 {
-  "prompt": "A majestic steampunk dragon soaring through a cloudy sky, intricate clockwork details, golden hour lighting, highly detailed",
-  "negative_prompt": "blurry, low quality, deformed, ugly, text, watermark, signature",
-  "height": 1024,
-  "width": 1024,
-  "num_inference_steps": 25,
-  "refiner_inference_steps": 50,
-  "guidance_scale": 7.5,
-  "strength": 0.3,
-  "high_noise_frac": 0.8,
-  "seed": 42,
-  "scheduler": "K_EULER",
-  "num_images": 1,
-  "image_url": null
+  "input": {
+    "prompt": "A majestic steampunk dragon soaring through a cloudy sky, intricate clockwork details, golden hour lighting, highly detailed",
+    "negative_prompt": "blurry, low quality, deformed, ugly, text, watermark, signature",
+    "height": 1024,
+    "width": 1024,
+    "num_inference_steps": 25,
+    "refiner_inference_steps": 50,
+    "guidance_scale": 7.5,
+    "strength": 0.3,
+    "high_noise_frac": 0.8,
+    "seed": 42,
+    "scheduler": "K_EULER",
+    "num_images": 1
+  }
 }
 ```
+
+which is producing an output like this:
+
+```json
+{
+  "delayTime": 11449,
+  "executionTime": 6120,
+  "id": "447f10b8-c745-4c3b-8fad-b1d4ebb7a65b-e1",
+  "output": {
+    "image_url": "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAABAAAAAQACAIAAADwf7zU...",
+    "images": [
+      "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAABAAAAAQACAIAAADwf7zU..."
+    ],
+    "seed": 42
+  },
+  "status": "COMPLETED",
+  "workerId": "462u6mrq9s28h6"
+}
+```
+
+and when you convert the base64-encoded image into an actual image:
+
+![SDXL Generated Image](https://cpjrphpz3t5wbwfe.public.blob.vercel-storage.com/worker-sdxl_output_1-AedTpZlz1eIwIgAEShlod6syLo6Jq6.jpeg)
