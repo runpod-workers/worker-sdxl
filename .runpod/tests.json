@@ -3,7 +3,7 @@
     {
       "name": "basic_test",
       "input": {
-        "prompt": "A majestic steampunk dragon soaring through a cloudy sky, intricate clockwork details, golden hour lighting, highly detailed",
+        "prompt": "a majestic steampunk dragon soaring through a cloudy sky, intricate clockwork details, golden hour lighting, highly detailed",
         "negative_prompt": "blurry, low quality, deformed, ugly, text, watermark, signature",
         "height": 1024,
         "width": 1024,
