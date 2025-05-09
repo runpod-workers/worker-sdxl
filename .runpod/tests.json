@@ -12,7 +12,7 @@
         "guidance_scale": 7.5,
         "strength": 0.3,
         "high_noise_frac": 0.8,
-        "seed": 42,
+        "seed": 1337,
         "scheduler": "K_EULER",
         "num_images": 1,
         "image_url": null
