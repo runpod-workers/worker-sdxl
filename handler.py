@@ -116,12 +116,45 @@ def generate_image(job):
     """
     Generate an image from text using your Model
     """
+    # -------------------------------------------------------------------------
+    # 🐞 DEBUG LOGGING
+    # -------------------------------------------------------------------------
+    import json, pprint
+
+    # Log the exact structure RunPod delivers so we can see every nesting level.
+    print("[generate_image] RAW job dict:")
+    try:
+        print(json.dumps(job, indent=2, default=str), flush=True)
+    except Exception:
+        pprint.pprint(job, depth=4, compact=False)
+
+    # -------------------------------------------------------------------------
+    # Original (strict) behaviour – assume the expected single wrapper exists.
+    # -------------------------------------------------------------------------
     job_input = job["input"]
 
-    print(job_input)
+    print("[generate_image] job['input'] payload:")
+    try:
+        print(json.dumps(job_input, indent=2, default=str), flush=True)
+    except Exception:
+        pprint.pprint(job_input, depth=4, compact=False)
 
     # Input validation
-    validated_input = validate(job_input, INPUT_SCHEMA)
+    try:
+        validated_input = validate(job_input, INPUT_SCHEMA)
+    except Exception as err:
+        import traceback
+
+        print("[generate_image] validate(...) raised an exception:", err, flush=True)
+        traceback.print_exc()
+        # Re-raise so RunPod registers the failure (but logs are now visible).
+        raise
+
+    print("[generate_image] validate(...) returned:")
+    try:
+        print(json.dumps(validated_input, indent=2, default=str), flush=True)
+    except Exception:
+        pprint.pprint(validated_input, depth=4, compact=False)
 
     if "errors" in validated_input:
         return {"error": validated_input["errors"]}
