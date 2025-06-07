@@ -15,6 +15,8 @@ from diffusers import (
     DDIMScheduler,
     EulerDiscreteScheduler,
     DPMSolverMultistepScheduler,
+    EulerAncestralDiscreteScheduler,
+    DPMSolverSinglestepScheduler,
 )
 
 import runpod
@@ -49,7 +51,10 @@ class ModelHandler:
             add_watermarker=False,
             local_files_only=True,
         ).to("cuda")
+        
+        # Enable memory optimizations
         base_pipe.enable_xformers_memory_efficient_attention()
+        base_pipe.enable_model_cpu_offload()
 
         return base_pipe
 
@@ -70,7 +75,10 @@ class ModelHandler:
             add_watermarker=False,
             local_files_only=True,
         ).to("cuda")
+        
+        # Enable memory optimizations
         refiner_pipe.enable_xformers_memory_efficient_attention()
+        refiner_pipe.enable_model_cpu_offload()
 
         return refiner_pipe
 
@@ -107,7 +115,9 @@ def make_scheduler(name, config):
         "KLMS": LMSDiscreteScheduler.from_config(config),
         "DDIM": DDIMScheduler.from_config(config),
         "K_EULER": EulerDiscreteScheduler.from_config(config),
+        "K_EULER_ANCESTRAL": EulerAncestralDiscreteScheduler.from_config(config),
         "DPMSolverMultistep": DPMSolverMultistepScheduler.from_config(config),
+        "DPMSolverSinglestep": DPMSolverSinglestepScheduler.from_config(config),
     }[name]
 
 
@@ -165,8 +175,9 @@ def generate_image(job):
     if job_input["seed"] is None:
         job_input["seed"] = int.from_bytes(os.urandom(2), "big")
 
-    # Assuming device_map puts model on cuda if available
-    generator = torch.Generator("cuda").manual_seed(job_input["seed"])
+    # Create generator with proper device handling
+    device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+    generator = torch.Generator(device).manual_seed(job_input["seed"])
 
     MODELS.base.scheduler = make_scheduler(
         job_input["scheduler"], MODELS.base.scheduler.config
@@ -174,40 +185,66 @@ def generate_image(job):
 
     if starting_image:  # If image_url is provided, run only the refiner pipeline
         init_image = load_image(starting_image).convert("RGB")
-        output = MODELS.refiner(
-            prompt=job_input["prompt"],
-            num_inference_steps=job_input["refiner_inference_steps"],
-            strength=job_input["strength"],
-            image=init_image,
-            generator=generator,
-        ).images
-    else:
-        # Generate latent image using pipe
-        image = MODELS.base(
-            prompt=job_input["prompt"],
-            negative_prompt=job_input["negative_prompt"],
-            height=job_input["height"],
-            width=job_input["width"],
-            num_inference_steps=job_input["num_inference_steps"],
-            guidance_scale=job_input["guidance_scale"],
-            denoising_end=job_input["high_noise_frac"],
-            output_type="latent",
-            num_images_per_prompt=job_input["num_images"],
-            generator=generator,
-        ).images
-
-        try:
-            output = MODELS.refiner(
+        with torch.inference_mode():
+            refiner_result = MODELS.refiner(
                 prompt=job_input["prompt"],
                 num_inference_steps=job_input["refiner_inference_steps"],
                 strength=job_input["strength"],
-                image=image,
-                num_images_per_prompt=job_input["num_images"],
+                image=init_image,
                 generator=generator,
-            ).images
+            )
+            output = refiner_result.images
+    else:
+        try:
+            # Generate latent image using base pipeline
+            with torch.inference_mode():
+                base_result = MODELS.base(
+                    prompt=job_input["prompt"],
+                    negative_prompt=job_input["negative_prompt"],
+                    height=job_input["height"],
+                    width=job_input["width"],
+                    num_inference_steps=job_input["num_inference_steps"],
+                    guidance_scale=job_input["guidance_scale"],
+                    denoising_end=job_input["high_noise_frac"],
+                    output_type="latent",
+                    num_images_per_prompt=job_input["num_images"],
+                    generator=generator,
+                )
+                image = base_result.images
+
+            # Debug: Log tensor info
+            if hasattr(image, 'dtype'):
+                print(f"[DEBUG] Base output dtype: {image.dtype}, shape: {image.shape}", flush=True)
+            elif isinstance(image, list) and len(image) > 0:
+                print(f"[DEBUG] Base output list, first item dtype: {image[0].dtype}, shape: {image[0].shape}", flush=True)
+
+            # Ensure latent images have correct dtype for refiner
+            if hasattr(image, 'dtype') and hasattr(image, 'to'):
+                image = image.to(dtype=torch.float16)
+            elif isinstance(image, list) and len(image) > 0 and hasattr(image[0], 'dtype'):
+                image = [img.to(dtype=torch.float16) for img in image]
+            
+            # Refine the image
+            with torch.inference_mode():
+                refiner_result = MODELS.refiner(
+                    prompt=job_input["prompt"],
+                    num_inference_steps=job_input["refiner_inference_steps"],
+                    strength=job_input["strength"],
+                    image=image,
+                    num_images_per_prompt=job_input["num_images"],
+                    generator=generator,
+                )
+                output = refiner_result.images
         except RuntimeError as err:
+            print(f"[ERROR] RuntimeError in generation pipeline: {err}", flush=True)
             return {
                 "error": f"RuntimeError: {err}, Stack Trace: {err.__traceback__}",
+                "refresh_worker": True,
+            }
+        except Exception as err:
+            print(f"[ERROR] Unexpected error in generation pipeline: {err}", flush=True)
+            return {
+                "error": f"Unexpected error: {err}",
                 "refresh_worker": True,
             }
 
