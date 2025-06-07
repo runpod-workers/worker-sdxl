@@ -4,7 +4,7 @@
       "name": "basic_test",
       "input": {
         "prompt": "a majestic steampunk dragon soaring through a cloudy sky, intricate clockwork details, golden hour lighting, highly detailed",
-        "negative_prompt": "blurry, low quality, deformed, ugly, text, watermark, signature",
+        "negative_prompt": "blurry, very low quality, deformed, ugly, text, watermark, signature,",
         "height": 1024,
         "width": 1024,
         "num_inference_steps": 25,
