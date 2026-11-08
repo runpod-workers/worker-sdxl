@@ -24,8 +24,9 @@ RUN pip install uv
 ENV PATH="/.venv/bin:${PATH}"
 RUN uv venv --python 3.11 /.venv
 
-# install dependencies
-RUN uv pip install torch --extra-index-url https://download.pytorch.org/whl/cu121
+# install dependencies (pip too: the venv has none, and tools such as the
+# Flash runtime used by CI run `python3 -m pip`)
+RUN uv pip install pip torch --extra-index-url https://download.pytorch.org/whl/cu121
 
 # install remaining dependencies from PyPI
 COPY requirements.txt /requirements.txt
