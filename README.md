@@ -6,7 +6,7 @@ Run [Stable Diffusion XL](https://huggingface.co/stabilityai/stable-diffusion-xl
 
 ---
 
-[![RunPod](https://api.runpod.io/badge/runpod-workers/worker-sdxl)](https://www.runpod.io/console/hub/runpod-workers/worker-sdxl)
+[![Runpod](https://api.runpod.io/badge/runpod-workers/worker-sdxl)](https://www.runpod.io/console/hub/runpod-workers/worker-sdxl)
 
 ---
 
